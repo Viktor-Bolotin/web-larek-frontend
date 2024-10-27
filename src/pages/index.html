@@ -99,22 +99,23 @@
 		<div class="modal__container">
 			<button class="modal__close" aria-label="закрыть"></button>
 			<div class="modal__content">
-				<form class="form">
-					<div class="order">
+				<form class="form" name="order">
+					<div class="order order_payment">
 						<div class="order__field">
 							<h2 class="modal__title">Способ оплаты</h2>
 							<div class="order__buttons">
-								<button type="button" class="button button_alt">Онлайн</button>
-								<button type="button" class="button button_alt">При получении</button>
+								<button name="card" type="button" class="button button_alt">Онлайн</button>
+								<button name="cash" type="button" class="button button_alt">При получении</button>
 							</div>
 						</div>
 						<label class="order__field">
 							<span class="form__label modal__title">Адрес доставки</span>
-							<input class="form__input" type="text" placeholder="Введите адрес" />
+							<input name="address" class="form__input" type="text" placeholder="Введите адрес" />
 						</label>
 					</div>
 					<div class="modal__actions">
-						<button disabled class="button">Далее</button>
+						<button type="submit" disabled class="button order__button">Далее</button>
+						<span class="form__errors"></span>
 					</div>
 				</form>
 			</div>
@@ -125,19 +126,20 @@
 		<div class="modal__container">
 			<button class="modal__close" aria-label="закрыть"></button>
 			<div class="modal__content">
-				<form class="form">
-					<div class="order">
+				<form class="form" name="contacts">
+					<div class="order order_contacts">
 						<label class="order__field">
 							<span class="form__label modal__title">Email</span>
-							<input class="form__input" type="text" placeholder="Введите Email" />
+							<input name="email" class="form__input" type="text" placeholder="Введите Email" />
 						</label>
 						<label class="order__field">
 							<span class="form__label modal__title">Телефон</span>
-							<input class="form__input" type="text" placeholder="+7 (" />
+							<input name="phone" class="form__input" type="text" placeholder="+7 (" />
 						</label>
 					</div>
 					<div class="modal__actions">
-						<button disabled class="button">Оплатить</button>
+						<button type="submit" disabled class="button">Оплатить</button>
+						<span class="form__errors"></span>
 					</div>
 				</form>
 			</div>
@@ -149,8 +151,8 @@
 			<button class="modal__close" aria-label="закрыть"></button>
 			<div class="modal__content">
 				<div class="order-success">
-					<h2 class="film__title">Заказ оформлен</h2>
-					<p class="film__description">Списано 153 250 синапсов</p>
+					<h2 class="order-success__title">Заказ оформлен</h2>
+					<p class="order-success__description">Списано 0 синапсов</p>
 					<button class="button order-success__close">За новыми покупками!</button>
 				</div>
 			</div>
