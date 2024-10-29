@@ -8,20 +8,14 @@ export class Page {
   wrapper: HTMLElement
   buttonOpenBasket: HTMLElement
   gallery: HTMLElement
-  galleryElements: HTMLElement[]
   broker: EventEmitter
   basketCounter: HTMLElement
 
-  constructor(container: HTMLElement, broker: EventEmitter) {
+  constructor(container: HTMLElement) {
     this.container = container
     this.wrapper = container.querySelector('.page__wrapper')
     this.buttonOpenBasket = container.querySelector('.header__basket')
-    this.buttonOpenBasket.addEventListener('click', () => {
-      broker.emit(EventList.OpenModalBasket)
-    })
     this.gallery = container.querySelector('.gallery')
-    this.galleryElements = []
-    this.broker = broker
     this.basketCounter = this.container.querySelector('.header__basket-counter')
   }
 
@@ -34,11 +28,9 @@ export class Page {
     }
   }
 
-  renderGallery(items: IProduct[], cardTemplate: HTMLTemplateElement) {
-    items.forEach((item) => {
-      const cardElement = setCardGalleryElement(cardTemplate, item, this.broker)
-      this.galleryElements.push(cardElement)
-      this.gallery.append(cardElement)
+  renderGallery(cardElements: HTMLElement[]) {
+    cardElements.forEach((card) => {
+      this.gallery.append(card)
     })
     }
   

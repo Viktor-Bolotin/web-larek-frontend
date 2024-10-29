@@ -1,47 +1,36 @@
-import { GetProducts, IBasketItem, IGetProductApi, IProduct, IProductAPI } from "../../types"
+import { ReceiveProducts, IBasketItem, IGetProductApi, IProduct, IProductAPI } from "../../types"
 import { EventEmitter, EventList } from "../basic/events"
+import { setCardGalleryElement } from "../view/helpFunctions"
 import { setCategoryClass } from "./helpFunctions"
 
 export class Products {
   productsList: IProduct[]
   api: IProductAPI
   broker: EventEmitter
+  cardElementList: HTMLElement[]
 
   constructor(api:IProductAPI, broker: EventEmitter) {
     this.productsList = []
     this.api = api
     this.broker = broker
+    this.cardElementList = []
   }
 
-  getProducts() {
+  receiveProducts(template: HTMLTemplateElement) {
     this.api.getProductList()
-    .then((res: IGetProductApi[] | IGetProductApi) => {
-      if(!Array.isArray(res)) {
-        this.addProduct(res)
-      } 
-      else{
-        res.forEach((product) => {
-          this.addProduct(product)
-        })
-      }
-      this.broker.emit<GetProducts>(EventList.GetProductList, this)
+    .then((res: IGetProductApi[]) => {
+      this.productsList = res
+      this.setProducts()
+      this.setCards(template)
     })
   }
 
-  addProduct(item: IGetProductApi) {
-    const newProduct: IProduct = {
-    id: item.id,
-    category: item.category,
-    description: item.description,
-    image: item.image,
-    title: item.title,
-    selected: false,
-    alt: item.title,
-    price: item.price,
-    categoryClass: setCategoryClass(item.category)
-    }
-    
-    this.productsList.push(newProduct)
+  setProducts() {
+    this.productsList.forEach((product) => {
+      product.alt = product.title
+      product.categoryClass = setCategoryClass(product.category)
+      product.selected = false
+    })
   }
 
   getProduct(cardSettings: IProduct) {
@@ -60,5 +49,13 @@ export class Products {
         product.selected = selected
       }
     })
+  }
+
+  setCards(cardTemplate: HTMLTemplateElement) {
+    this.productsList.forEach((product) => {
+      const cardElement = setCardGalleryElement(cardTemplate, product, this.broker)
+      this.cardElementList.push(cardElement)
+    })
+    this.broker.emit<ReceiveProducts>(EventList.GetProductList)
   }
 }

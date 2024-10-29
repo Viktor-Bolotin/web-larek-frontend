@@ -5,23 +5,24 @@ export type IModalBasketCard = {
   element: HTMLElement
 }
 export type deleteProduct = {id: string}
-export type GetProducts = {productsList: IProduct[]}
+export type ReceiveProducts = {productsList: IProduct[]}
 export type ClickEvent<T> = {event: MouseEvent, item: T}
 export type addBasket = {cardSettings: IBasketItem}
 export type ChangeBasket = {newSize: number}
 export type PaymantAndAddress = {payment: string, address: string}
+export type PhoneAndEmail = {phone: string, email: string}
 
 // Типы данных для обработки товаров
 export interface IProduct {
   id: string;
   description: string;
   image: string;
-  alt: string;
+  alt?: string;
   title: string;
   category: string;
   price: price
-  selected: boolean;
-  categoryClass: string
+  selected?: boolean;
+  categoryClass?: string
 }
 
 export interface IBasketItem {
@@ -31,7 +32,7 @@ export interface IBasketItem {
 }
 
 export interface IOrderProduct {
-  payment: payment
+  payment: string
   email: string
   phone: string
   address: string

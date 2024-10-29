@@ -39,7 +39,7 @@ export class ModalCard extends Modal {
   modalPrice: HTMLElement
   modalCategory: HTMLElement
   modalImage: HTMLImageElement
-  modalCard?: IProduct
+  modalSettings?: IProduct
   constructor(container: HTMLElement, broker: EventEmitter) {
     super(container, broker)
     
@@ -48,15 +48,10 @@ export class ModalCard extends Modal {
     this.modalPrice = this.modal.querySelector('.card__price')
     this.modalCategory = this.modal.querySelector('.card__category')
     this.modalImage = this.modal.querySelector('.card__image')
-    this.modalButton.addEventListener('click', () => {
-      broker.emit<ClickCard>(EventList.ModalAddBasket, ({cardSettings: this.modalCard}))
-      this.modalButton.textContent = 'Добавлено в корзину'
-      this.modalButton.disabled = true
-    })
   }
 
   setModal(cardSettings: IProduct) {
-    this.modalCard = cardSettings
+    this.modalSettings = cardSettings
     this.modalTitle.textContent = cardSettings.title
     this.modalDescription.textContent = cardSettings.description
 
@@ -81,45 +76,25 @@ export class ModalCard extends Modal {
     this.modalCategory.textContent = cardSettings.category
     this.modalCategory.classList.remove('card__category_other')
     this.modalCategory.classList.add(`card__category_${cardSettings.categoryClass}`)
-
-    this.openModal()
   }
 }
 
 export class ModalBasket extends Modal {
   modalList:HTMLElement
-  modalCards: IModalBasketCard[]
 
   constructor(container: HTMLElement, broker: EventEmitter) {
     super(container, broker)
     this.modalList = this.modal.querySelector('.basket__list')
-    this.modalCards = []
-    this.modalButton.addEventListener('click', () => {
-      broker.emit(EventList.ContinueModalBasket)
-    })
   }
 
-  addBasketElement(basketItem: IBasketItem, template: HTMLTemplateElement) {
-    if(!this.modalCards.some(card => card.id === basketItem.id)) {
-      this.modalCards.push({
-        id: basketItem.id, 
-        element: setBasketElement(template, basketItem, this.broker)
-        })
-    }
-  }
-
-  removeBasketElement(id: string) {
-    this.modalCards = this.modalCards.filter((basketElement) => basketElement.id !== id)
-  }
-
-  renderBasket(sumBasket: number) {
+  renderBasket(basketElements: IModalBasketCard[], sumBasket: number) {
     while(this.modalList.firstChild) {
       this.modalList.removeChild(this.modalList.firstChild)
     }
 
-    if(this.modalCards.length > 0) {
-    this.modalCards.forEach((card) => {
-      card.element.querySelector('.basket__item-index').textContent = `${this.modalCards.indexOf(this.modalCards.find((element) => element.id === card.id)) + 1}`
+    if(basketElements.length > 0) {
+    basketElements.forEach((card) => {
+      card.element.querySelector('.basket__item-index').textContent = `${basketElements.indexOf(basketElements.find((element) => element.id === card.id)) + 1}`
       this.modalList.append(card.element)
     })
     this.modalButton.disabled = false
@@ -132,43 +107,20 @@ export class ModalBasket extends Modal {
   }
 }
 
-abstract class ModalClientData extends Modal {
-modalInputs: HTMLInputElement[]
-
-  constructor(container: HTMLElement, broker: EventEmitter) {
-    super(container, broker)
-    this.modalButton = this.modal.querySelector('.modal__actions').querySelector('.button')
-    this.modalInputs = Array.from(this.modal.querySelectorAll('input'))
-    this.modalInputs.forEach((input) => {
-      input.value = ''
-      input.addEventListener('input',() => {
-        this.isValidModal()
-      })
-    })
-  }
-
-  isValidInput() {
-      if(this.modalInputs.every((input) => input.value !== '')) {
-        return true
-      }
-      else {
-        return false
-      }
-  }
-
-  isValidModal() {}
-}
-
-export class ModalOrder extends ModalClientData {
+export class ModalOrder extends Modal {
   paymentButtons: HTMLElement[]
-  payment: string
   addressInput: HTMLInputElement
-  address: string
+  payment: string
 
   constructor(container: HTMLElement, broker: EventEmitter) {
     super(container, broker)
+
+    this.addressInput = this.modal.querySelector('input[name = address]')
+    this.addressInput.addEventListener(('input'), () => {
+      this.isValidModal()
+    })
+
     this.payment = ''
-    this.address = ''
 
     this.paymentButtons = Array.from(this.modal.querySelector('.order__buttons').querySelectorAll('.button'))
     this.paymentButtons.forEach((button) => {
@@ -178,17 +130,11 @@ export class ModalOrder extends ModalClientData {
       })
     })
 
-    this.addressInput = this.modalInputs.find((input) => input.name === 'address')
-
-    this.modalButton.addEventListener('click', (e) => {
-      e.preventDefault()
-      this.address = this.addressInput.value
-      this.broker.emit(EventList.ChoosePeymentAndAddress)
-    })
+    this.modalButton = this.modal.querySelector('.modal__actions').querySelector('.button')
   }
 
   isValidModal(): void {
-   if(this.isValidInput() && this.payment !== ''){
+   if(this.addressInput.value !== '' && this.payment !== ''){
     this.modalButton.disabled = false
    } 
 
@@ -196,49 +142,36 @@ export class ModalOrder extends ModalClientData {
     this.modalButton.disabled = true
    }
   }
-
-  getOrderData() {
-    return {
-      payment: this.payment as payment,
-      address: this.address
-    }
-  }
 }
 
-export class ModalContacts extends ModalClientData {
+export class ModalContacts extends Modal {
+  modalInputs: HTMLInputElement[]
   emailInput: HTMLInputElement
-  email: string
   phoneInput: HTMLInputElement
-  phone: string
 
   constructor(container: HTMLElement, broker: EventEmitter) {
     super(container, broker)
 
+    this.modalInputs = Array.from(this.modal.querySelectorAll('input'))
+    this.modalInputs.forEach((input) => {
+      input.addEventListener(('input'), () => {
+        this.isValidModal()
+      })
+    })
+
     this.emailInput = this.modalInputs.find((input) => input.name === 'email')
     this.phoneInput = this.modalInputs.find((input) => input.name === 'phone')
 
-    this.modalButton.addEventListener('click', (e) => {
-      e.preventDefault()
-      this.email = this.emailInput.value
-      this.phone = this.phoneInput.value
-      this.broker.emit(EventList.PlaceAnOrder)
-    })
+    this.modalButton = this.modal.querySelector('.modal__actions').querySelector('.button')
   }
 
   isValidModal(): void {
-    if(this.isValidInput()) {
+    if(this.emailInput.value !=='' && this.phoneInput.value !== '') {
       this.modalButton.disabled = false
     }
 
     else{
       this.modalButton.disabled = true
-    }
-  }
-
-  getOrderData() {
-    return {
-      email: this.email,
-      phone: this.phone
     }
   }
 }
@@ -249,13 +182,9 @@ export class ModalSuccess extends Modal {
   constructor(container: HTMLElement, broker: EventEmitter) {
     super(container, broker)
     this.total = container.querySelector('.order-success__description')
-    this.modalButton.addEventListener('click', () => {
-      this.closeModal()
-    })
   }
 
   renderModal(sumOrder: number) {
     this.total.textContent = `Списано ${sumOrder} синапсов`
-    this.openModal()
   }
 }

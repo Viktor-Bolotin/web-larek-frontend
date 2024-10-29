@@ -17,7 +17,6 @@ export class Order {
     if(data.items){this.orderInf.items = data.items}
     if(data.phone){this.orderInf.phone = data.phone}
     if(data.total){this.orderInf.total = data.total}
-
   }
 
   getOrderData() {
