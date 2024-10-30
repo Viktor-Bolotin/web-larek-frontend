@@ -1,14 +1,9 @@
-import { ClickCard, IProduct } from "../../types"
-import { cloneTemplate } from "../../utils/utils"
-import { EventEmitter, EventList, IEvents } from "../basic/events"
-import { setCardElement, setCardGalleryElement } from "./helpFunctions"
-
 export class Page {
   container: HTMLElement
   wrapper: HTMLElement
   buttonOpenBasket: HTMLElement
   gallery: HTMLElement
-  broker: EventEmitter
+  galleryElements: HTMLElement[]
   basketCounter: HTMLElement
 
   constructor(container: HTMLElement) {
@@ -28,10 +23,8 @@ export class Page {
     }
   }
 
-  renderGallery(cardElements: HTMLElement[]) {
-    cardElements.forEach((card) => {
-      this.gallery.append(card)
-    })
+  renderGallery() {
+    this.galleryElements.forEach((element) => this.gallery.append(element))
     }
   
   setBasketCounter(size: number) {

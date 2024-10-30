@@ -86,15 +86,14 @@ export class EventEmitter implements IEvents {
 }
 
 export enum EventList {
-    GetProductList = 'product:get',
     ClickCard = 'product:open',
     OpenModal = 'modal:open',
     CloseModal = 'modal:close',
     ModalAddBasket = 'modal:addBasket',
     OpenModalBasket = 'basket:open',
     DeleteBasketItem = 'basket:delete',
-    ChangeBasketItem = 'basket:change',
     ContinueModalBasket = 'basket:continue',
     ChoosePeymentAndAddress = 'order:payment',
     PlaceAnOrder = 'order:place',
+    UpdateBasket = 'basket:update'
 }

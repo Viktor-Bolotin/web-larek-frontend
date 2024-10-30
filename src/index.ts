@@ -4,11 +4,17 @@ import { API_URL, CDN_URL } from './utils/constants';
 import { ensureElement } from './utils/utils';
 import { EventEmitter, EventList } from './components/basic/events';
 import { Page } from './components/view/page';
-import { addBasket, ChangeBasket, ClickCard, deleteProduct, ReceiveProducts, IOrderSuccess, PaymantAndAddress, PhoneAndEmail } from './types';
+import { addBasket, ChangeBasket, ClickCard, deleteProduct, ReceiveProducts, IOrderSuccess, PaymantAndAddress, PhoneAndEmail, IGetProductApi } from './types';
 import { Products } from './components/model/products';
-import { ModalCard, ModalBasket, ModalContacts, ModalOrder, ModalSuccess } from "./components/Modal";
 import { Basket } from './components/model/basket';
 import { Order } from './components/model/order';
+import { GalleryItemView } from './components/view/GalleryItemView';
+import { BasketItemView } from './components/view/BasketItemView';
+import { ModalBasket } from './components/view/ModalBasket';
+import { ModalCard } from './components/view/ModalCard';
+import { ModalOrder } from './components/view/ModalOrder';
+import { ModalContacts } from './components/view/ModalContacts';
+import { ModalSuccess } from './components/view/ModalSuccess';
 
 const cardTemplate = ensureElement<HTMLTemplateElement>('#card-catalog')
 const BasketElementTemplate = ensureElement<HTMLTemplateElement>('#card-basket')
@@ -17,9 +23,9 @@ const broker = new EventEmitter()
 const api = new ProductAPI(CDN_URL, API_URL)
 
 const page = new Page(document.querySelector('.page'))
-const products = new Products(api, broker)
+const products = new Products()
 const basket = new Basket(broker)
-const order = new Order(broker)
+const order = new Order()
 
 const modalBasket = new ModalBasket(document.querySelector('.basket').closest('.modal'), broker)
 const modalCard = new ModalCard(document.querySelector('.card_full').closest('.modal'), broker)
@@ -27,15 +33,22 @@ const modalOrder = new ModalOrder(document.querySelector('.order_payment').close
 const modalContacts = new ModalContacts(document.querySelector('.order_contacts').closest('.modal'), broker)
 const modalSuccess = new ModalSuccess(document.querySelector('.order-success').closest('.modal'), broker)
 
-
-products.receiveProducts(cardTemplate)
+api.getProductList()
+  .then((res: IGetProductApi[]) => {
+    products.productsList = res
+    products.setSelectedProducts()
+    page.galleryElements = products.productsList.map((product) => new GalleryItemView(cardTemplate, product, broker).galleryCard)
+    page.renderGallery()
+  })
+  .catch((err) => console.log(err))
 
 page.buttonOpenBasket.addEventListener('click', () => {
+  modalBasket.setBasket(basket.calculateBasketSum())
   broker.emit(EventList.OpenModalBasket)
 })
 
 // Подключение функциональности кнопок основного события модальных окон
-modalCard.modalButton.addEventListener('click',() => {
+modalCard.modalButton.addEventListener('click', () => {
   broker.emit<ClickCard>(EventList.ModalAddBasket, ({cardSettings: modalCard.modalSettings}))
   modalCard.modalButton.textContent = 'Добавлено в корзину'
   modalCard.modalButton.disabled = true
@@ -67,10 +80,6 @@ modalSuccess.modalButton.addEventListener(('click'), () => {
 
 
 // Отслеживание событий брокера
-broker.on<ReceiveProducts>(EventList.GetProductList, () => {
-  page.renderGallery(products.cardElementList)
-})
-
 broker.on<ClickCard>(EventList.ClickCard, ({cardSettings}) => {
   modalCard.setModal(cardSettings)
   modalCard.openModal()
@@ -86,22 +95,22 @@ broker.on(EventList.CloseModal, () => {
 
 broker.on<addBasket>(EventList.ModalAddBasket, ({cardSettings}) => {
   products.toggleSelectProduct(cardSettings.id, true)
-  basket.addBasketItem(cardSettings, BasketElementTemplate)
+  basket.addBasketItem(cardSettings)
 })
 
 broker.on(EventList.OpenModalBasket, () => {
-  modalBasket.renderBasket(basket.basketElementList, basket.calculateBasketSum());
   modalBasket.openModal()
 })
 
-broker.on<deleteProduct>(EventList.DeleteBasketItem, ({id}) => {
-  products.toggleSelectProduct(id, false)
-  basket.removeBasketItem(id)
-  modalBasket.renderBasket(basket.basketElementList, basket.calculateBasketSum())
+broker.on<deleteProduct>(EventList.DeleteBasketItem, (id) => {
+  products.toggleSelectProduct(id.id, false)
+  basket.removeBasketItem(id.id)
 })
 
-broker.on<ChangeBasket>(EventList.ChangeBasketItem, ({ newSize }) => {
-  page.setBasketCounter(newSize)
+broker.on(EventList.UpdateBasket, () => {
+  modalBasket.basketElementList = basket.basketItemList.map((basketItem) => new BasketItemView(BasketElementTemplate, basketItem, broker).basketCard)
+  modalBasket.setBasket(basket.calculateBasketSum())
+  page.setBasketCounter(basket.basketItemList.length)
 })
 
 broker.on(EventList.ContinueModalBasket, () => {
@@ -110,15 +119,14 @@ broker.on(EventList.ContinueModalBasket, () => {
   order.setOrderData(basket.getOrderData())
 })
 
-broker.on<PaymantAndAddress>(EventList.ChoosePeymentAndAddress, (inf) => {
+broker.on<PaymantAndAddress>(EventList.ChoosePeymentAndAddress, (information) => {
   modalContacts.openModal()
   modalOrder.closeModal()
-  order.setOrderData(inf)
+  order.setOrderData(information)
 })
 
-broker.on<PhoneAndEmail>(EventList.PlaceAnOrder, (inf) => {
-  order.setOrderData(inf)
-  console.log(order.orderInf)
+broker.on<PhoneAndEmail>(EventList.PlaceAnOrder, (information) => {
+  order.setOrderData(information)
 
   api.sentOrder(order.getOrderData())
   .then((data: IOrderSuccess) => {
@@ -132,5 +140,7 @@ broker.on<PhoneAndEmail>(EventList.PlaceAnOrder, (inf) => {
     modalSuccess.renderModal(data.total)
     modalSuccess.openModal()
     modalContacts.closeModal()
-  }) 
+  })
+
+  .catch((err) => console.log(err))
 })

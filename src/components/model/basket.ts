@@ -1,65 +1,41 @@
-import { IBasketItem, IModalBasketCard, IOrderProduct } from "../../types"
+import { IBasketItem, IOrderProduct } from "../../types"
 import { EventEmitter, EventList } from "../basic/events"
-import { setBasketElement } from "../view/helpFunctions"
 
 export class Basket {
   basketItemList: IBasketItem[]
-  basketSum: number
-  broker:EventEmitter
-  basketElementList: IModalBasketCard[]
+  broker: EventEmitter
 
   constructor(broker: EventEmitter) {
     this.basketItemList = []
-    this.basketSum = 0
     this.broker = broker
-    this.basketElementList = []
   }
 
-  addBasketItem(element: IBasketItem, template: HTMLTemplateElement) {
+  addBasketItem(element: IBasketItem) {
         const newBasketItem: IBasketItem = {
           title: element.title,
           price: element.price,
           id: element.id
         }
         this.basketItemList.push(newBasketItem)
-        this.setBasketSize()
-        this.addBasketElement(newBasketItem, template)
+        this.broker.emit(EventList.UpdateBasket)
       }
-
-  addBasketElement(basketItem: IBasketItem, template: HTMLTemplateElement) {
-    if(!this.basketElementList.some(card => card.id === basketItem.id)) {
-      this.basketElementList.push({
-        id: basketItem.id, 
-        element: setBasketElement(template, basketItem, this.broker)
-      })
-    }
-  }
 
   removeBasketItem(id: string) {
     this.basketItemList = this.basketItemList.filter((basketProduct) => basketProduct.id !== id)
-    this.setBasketSize()
-    this.removeBasketElement(id)
-  }
-
-  removeBasketElement(id:string) {
-    this.basketElementList = this.basketElementList.filter((basketElement) => basketElement.id !== id)
+    this.broker.emit(EventList.UpdateBasket)
   }
 
   calculateBasketSum() {
-    this.basketSum = 0
+    let basketSum = 0
     this.basketItemList.forEach((product: IBasketItem) => {
       if(product.price === null) {
-        this.basketSum = this.basketSum + 0
+        basketSum = basketSum + 0
       }
       else {
-      this.basketSum = this.basketSum + product.price
+      basketSum = basketSum + product.price
       }
     })
-    return this.basketSum
-  }
-
-  setBasketSize() {
-    this.broker.emit(EventList.changeBasketItem, {newSize: this.basketItemList.length})
+    return basketSum
   }
 
   getOrderData() {
@@ -67,7 +43,6 @@ export class Basket {
       items: [],
       total: this.calculateBasketSum() 
     }
-    console.log(this.basketItemList)
     this.basketItemList.forEach((basketItem) => {
       if(basketItem.price) {      
         basketProducts.items.push(basketItem.id)

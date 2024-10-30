@@ -17,12 +17,10 @@ export interface IProduct {
   id: string;
   description: string;
   image: string;
-  alt?: string;
   title: string;
   category: string;
   price: price
   selected?: boolean;
-  categoryClass?: string
 }
 
 export interface IBasketItem {
