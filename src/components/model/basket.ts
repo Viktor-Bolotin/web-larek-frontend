@@ -11,12 +11,11 @@ export class Basket {
   }
 
   addBasketItem(element: IBasketItem) {
-        const newBasketItem: IBasketItem = {
+        this.basketItemList.push({
           title: element.title,
           price: element.price,
           id: element.id
-        }
-        this.basketItemList.push(newBasketItem)
+        })
         this.broker.emit(EventList.UpdateBasket)
       }
 
@@ -27,6 +26,7 @@ export class Basket {
 
   calculateBasketSum() {
     let basketSum = 0
+    if(this.basketItemList.length > 0) {
     this.basketItemList.forEach((product: IBasketItem) => {
       if(product.price === null) {
         basketSum = basketSum + 0
@@ -35,6 +35,7 @@ export class Basket {
       basketSum = basketSum + product.price
       }
     })
+    }
     return basketSum
   }
 

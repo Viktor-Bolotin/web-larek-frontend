@@ -1,7 +1,7 @@
 import { IProduct } from "../../types";
 import { cloneTemplate } from "../../utils/utils";
 import { EventEmitter, EventList } from "../basic/events";
-import { setCategoryClass } from "../view/helpFunctions";
+import { setCategoryClass } from "../../utils/utils";
 
 export class GalleryItemView {
   galleryCard: HTMLElement

@@ -89,7 +89,7 @@ export enum EventList {
     ClickCard = 'product:open',
     OpenModal = 'modal:open',
     CloseModal = 'modal:close',
-    ModalAddBasket = 'modal:addBasket',
+    AddBasket = 'modal:addBasket',
     OpenModalBasket = 'basket:open',
     DeleteBasketItem = 'basket:delete',
     ContinueModalBasket = 'basket:continue',

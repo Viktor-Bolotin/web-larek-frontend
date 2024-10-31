@@ -1,5 +1,3 @@
-import { IEvents } from "./events";
-
 export class DOM_element {
 
 }

@@ -1,15 +1,14 @@
-import { EventEmitter } from "../basic/events"
-import { Modal } from "./Modal"
+import { Component } from "../basic/component"
 
-export class ModalContacts extends Modal<HTMLElement>{
+export class ModalContactsContent extends Component<HTMLElement>{
   modalInputs: HTMLInputElement[]
   emailInput: HTMLInputElement
   phoneInput: HTMLInputElement
+  modalButton: HTMLButtonElement
 
-  constructor(container: HTMLElement, broker: EventEmitter) {
-    super(container, broker)
-
-    this.modalInputs = Array.from(this.modal.querySelectorAll('input'))
+  constructor(container: HTMLElement) {
+    super(container)
+    this.modalInputs = Array.from(this.container.querySelectorAll('input'))
     this.modalInputs.forEach((input) => {
       input.addEventListener(('input'), () => {
         this.isValidModal()
@@ -19,7 +18,7 @@ export class ModalContacts extends Modal<HTMLElement>{
     this.emailInput = this.modalInputs.find((input) => input.name === 'email')
     this.phoneInput = this.modalInputs.find((input) => input.name === 'phone')
 
-    this.modalButton = this.modal.querySelector('.modal__actions').querySelector('.button')
+    this.modalButton = this.container.querySelector('.modal__actions').querySelector('.button')
   }
 
   isValidModal(): void {
