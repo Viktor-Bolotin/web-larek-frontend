@@ -1,5 +1,5 @@
-import { IGetProductApi, IOrderProduct, IOrderSuccess, IProductAPI } from "../types";
-import { Api, ApiListResponse } from"./basic/api";
+import { IGetProductApi, IOrderProduct, IOrderSuccess, IProductAPI } from "../../types";
+import { Api, ApiListResponse } from"./api";
 
 export class ProductAPI extends Api implements IProductAPI {
   cdn: string;

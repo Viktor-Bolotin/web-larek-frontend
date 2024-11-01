@@ -1,9 +1,9 @@
-import { ProductAPI } from './components/productApi';
+import { ProductAPI } from './components/basic/productApi';
 import './scss/styles.scss';
 import { API_URL, CDN_URL } from './utils/constants';
 import { cloneTemplate, ensureElement } from './utils/utils';
 import { EventEmitter, EventList } from './components/basic/events';
-import { Page } from './components/view/page';
+import { Page } from './components/view/Page';
 import { addBasket, ClickCard, deleteProduct, IOrderSuccess, PaymantAndAddress, PhoneAndEmail, IGetProductApi } from './types';
 import { Products } from './components/model/products';
 import { Basket } from './components/model/basket';
@@ -44,7 +44,7 @@ api.getProductList()
   .then((res: IGetProductApi[]) => {
     products.productsList = res
     products.setSelectedProducts()
-    page.galleryElements = products.productsList.map((product) => new GalleryItemView(cardTemplate, product, broker).galleryCard)
+    page.galleryElements = products.productsList.map((product) => new GalleryItemView(cloneTemplate(cardTemplate), product, broker).render())
     page.renderGallery()
   })
   .catch((err) => console.log(err))
@@ -105,12 +105,15 @@ broker.on(EventList.OpenModalBasket, () => {
 broker.on<deleteProduct>(EventList.DeleteBasketItem, (id) => {
   products.toggleSelectProduct(id.id, false)
   basket.removeBasketItem(id.id)
-  mainModal.render({content: modalBasketContent.render(basket.calculateBasketSum())})
+  mainModal.content = modalBasketContent.render(basket.calculateBasketSum())
 })
 
 broker.on(EventList.UpdateBasket, () => {
-  BasketItemView.throwBasketItemCounter()
-  modalBasketContent.basketElementList = basket.basketItemList.map((basketItem) => new BasketItemView(BasketElementTemplate, basketItem, broker).basketCard)
+  let index = 0
+  modalBasketContent.basketElementList = basket.basketItemList.map((basketItem) => {
+    index++
+    return new BasketItemView(cloneTemplate(BasketElementTemplate), basketItem, broker, index).render()
+  })
   page.setBasketCounter(basket.basketItemList.length)
 })
 
@@ -136,9 +139,8 @@ broker.on(EventList.PlaceAnOrder, () => {
     products.productsList.forEach((product) => {
       products.toggleSelectProduct(product.id, false)
     })
-    basket.basketItemList.forEach((basketItem) => {
-      basket.removeBasketItem(basketItem.id)
-    })
+    basket.basketItemList = []
+    broker.emit(EventList.UpdateBasket)
 
     mainModal.render({content: modalSuccessContent.render(data.total)})
   })

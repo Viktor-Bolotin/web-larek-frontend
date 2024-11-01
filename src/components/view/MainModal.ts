@@ -31,8 +31,7 @@ export class MainModal extends Component<{content: HTMLElement}> {
 
   render(data?: {content: HTMLElement}): HTMLElement {
     super.render(data)
-    this.modalContent.removeChild(this.modalContent.firstChild)
-    this.modalContent.appendChild(this.content)
+    this.modalContent.replaceChildren(this.content)
     return this.container
   }
 }

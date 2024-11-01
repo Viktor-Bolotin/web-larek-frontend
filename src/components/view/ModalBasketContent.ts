@@ -1,10 +1,9 @@
 import { Component } from "../basic/component"
-import { EventEmitter } from "../basic/events"
 
 export class ModalBasketContent extends Component<number>{
   modalList: HTMLElement
-  basketElementList: HTMLElement[]
   modalButton: HTMLButtonElement
+  basketElementList: HTMLElement[]
 
   constructor(container: HTMLElement) {
     super(container)
@@ -14,9 +13,7 @@ export class ModalBasketContent extends Component<number>{
   }
 
   render(sumBasket: number) {
-    while(this.modalList.firstChild) {
-      this.modalList.removeChild(this.modalList.firstChild)
-    }
+    this.modalList.replaceChildren(...this.basketElementList)
     
     if(this.basketElementList.length > 0) {
       this.basketElementList.forEach((card) => {

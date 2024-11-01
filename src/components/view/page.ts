@@ -1,4 +1,6 @@
-export class Page {
+import { Component } from "../basic/component"
+
+export class Page extends Component<HTMLElement> {
   container: HTMLElement
   wrapper: HTMLElement
   buttonOpenBasket: HTMLElement
@@ -7,6 +9,7 @@ export class Page {
   basketCounter: HTMLElement
 
   constructor(container: HTMLElement) {
+    super(container)
     this.container = container
     this.wrapper = container.querySelector('.page__wrapper')
     this.buttonOpenBasket = container.querySelector('.header__basket')
@@ -15,12 +18,7 @@ export class Page {
   }
 
   lockedPage(value: boolean) {
-    if(value) {
-      this.wrapper.classList.add('page__wrapper_locked')
-    }
-    else {
-      this.wrapper.classList.remove('page__wrapper_locked')
-    }
+    this.toggleClass(this.wrapper, 'page__wrapper_locked', value)
   }
 
   renderGallery() {
@@ -28,7 +26,6 @@ export class Page {
     }
   
   setBasketCounter(size: number) {
-    this.basketCounter.textContent = `${size}`
+    this.setText(this.basketCounter, `${size}`)
   }
-
-  }
+}

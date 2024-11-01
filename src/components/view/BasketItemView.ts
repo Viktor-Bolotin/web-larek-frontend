@@ -1,32 +1,26 @@
 import { IBasketItem } from "../../types";
 import { cloneTemplate } from "../../utils/utils";
+import { Component } from "../basic/component";
 import { EventEmitter, EventList } from "../basic/events";
 
-export class BasketItemView {
-  basketCard: HTMLElement
-  private static basketItemCounter: number = 0
+export class BasketItemView extends Component<HTMLElement> {
   
-  constructor(template: HTMLTemplateElement, product: IBasketItem, broker: EventEmitter) {
-    this.basketCard = cloneTemplate(template)
+  constructor(container: HTMLElement, product: IBasketItem, broker: EventEmitter, index: number) {
+    super(container)
 
     if(product.price === null) {
-      this.basketCard.querySelector('.card__price').textContent = 'Бесценно'
+      this.setText(this.container.querySelector('.card__price'), 'Бесценно')
     }
     else {
-      this.basketCard.querySelector('.card__price').textContent = `${product.price} синапсов`
+      this.setText(this.container.querySelector('.card__price'), `${product.price} синапсов`)
     }
 
-    this.basketCard.querySelector('.card__title').textContent = product.title
+    this.setText(this.container.querySelector('.card__title'), product.title)
 
-    this.basketCard.querySelector('.basket__item-delete').addEventListener('mousedown', () => {
+    this.container.querySelector('.basket__item-delete').addEventListener('mousedown', () => {
       broker.emit(EventList.DeleteBasketItem, ({id: product.id}))
     })
 
-    BasketItemView.basketItemCounter++
-    this.basketCard.querySelector('.basket__item-index').textContent = String(BasketItemView.basketItemCounter)
-  }
-
-  static throwBasketItemCounter() {
-    BasketItemView.basketItemCounter = 0
+    this.setText( this.container.querySelector('.basket__item-index'), String(index))
   }
 }
