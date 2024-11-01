@@ -3,7 +3,7 @@ import './scss/styles.scss';
 import { API_URL, CDN_URL } from './utils/constants';
 import { cloneTemplate, ensureElement } from './utils/utils';
 import { EventEmitter, EventList } from './components/basic/events';
-import { Page } from './components/view/page';
+import { Page } from './components/view/Page';
 import { addBasket, ClickCard, deleteProduct, IOrderSuccess, PaymantAndAddress, PhoneAndEmail, IGetProductApi } from './types';
 import { Products } from './components/model/products';
 import { Basket } from './components/model/basket';
